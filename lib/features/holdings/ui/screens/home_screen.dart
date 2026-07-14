@@ -17,6 +17,7 @@ import '../../data/repository/holdings_repository.dart';
 import '../../logic/cubit/home_cubit.dart';
 import '../../logic/cubit/home_state.dart';
 import '../../logic/services/holding_search_service.dart';
+import '../widgets/basin_filter_sheet.dart';
 import '../widgets/recommendation_list.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -48,6 +49,21 @@ class _HomeScreenState extends State<HomeScreen> {
     context.pushNamed(Routes.fileHistory);
   }
 
+  Future<void> _openBasinFilter(
+    final BuildContext context,
+    final HomeCubit cubit,
+  ) async {
+    final HomeState state = cubit.state;
+    final String? selected = await showBasinFilterSheet(
+      context,
+      basins: state.availableBasins,
+      selected: state.selectedBasin,
+    );
+    if (selected != state.selectedBasin) {
+      cubit.selectBasin(selected);
+    }
+  }
+
   @override
   Widget build(final BuildContext context) {
     final colors = context.customColors;
@@ -56,7 +72,14 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: colors.background,
       body: SafeArea(
-        child: BlocBuilder<HomeCubit, HomeState>(
+        child: BlocConsumer<HomeCubit, HomeState>(
+          listenWhen: (final HomeState previous, final HomeState current) =>
+              current.status == HomeStatus.loaded &&
+              previous.status != HomeStatus.loaded &&
+              current.availableBasins.length > 1,
+          listener: (final BuildContext context, final HomeState state) {
+            _openBasinFilter(context, cubit);
+          },
           builder: (final BuildContext context, final HomeState state) {
             return AnimatedSwitcher(
               duration: const Duration(milliseconds: 250),
@@ -80,6 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     onQueryChanged: (final String q) =>
                         _onQueryChanged(q, cubit),
                     onShowHistory: () => _openHistory(context),
+                    onOpenBasinFilter: () => _openBasinFilter(context, cubit),
                   ),
                 },
               ),
@@ -246,6 +270,7 @@ class _LoadedBody extends StatelessWidget {
     required this.cubit,
     required this.onQueryChanged,
     required this.onShowHistory,
+    required this.onOpenBasinFilter,
   });
 
   final HomeState state;
@@ -253,6 +278,7 @@ class _LoadedBody extends StatelessWidget {
   final HomeCubit cubit;
   final void Function(String query) onQueryChanged;
   final VoidCallback onShowHistory;
+  final VoidCallback onOpenBasinFilter;
 
   @override
   Widget build(final BuildContext context) {
@@ -305,6 +331,20 @@ class _LoadedBody extends StatelessWidget {
                   ),
                 ],
               ),
+              if (state.availableBasins.isNotEmpty) ...[
+                verticalSpacing(10),
+                Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: _BasinChip(
+                    label: state.selectedBasin == null
+                        ? 'holdings.basin.all'.tr()
+                        : 'holdings.basin.focus_label'.tr(
+                            namedArgs: {'basin': state.selectedBasin!},
+                          ),
+                    onTap: onOpenBasinFilter,
+                  ),
+                ),
+              ],
               verticalSpacing(16),
               CustomTextForm(
                 hintText: 'holdings.search.hint'.tr(),
@@ -348,6 +388,48 @@ class _LoadedBody extends StatelessWidget {
     context.pushNamed(
       Routes.holdingDetail,
       arguments: repository.parcelsForHolding(result.holdingId),
+    );
+  }
+}
+
+class _BasinChip extends StatelessWidget {
+  const _BasinChip({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(final BuildContext context) {
+    final colors = context.customColors;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppColors.primary50.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.primary200),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.filter_alt_rounded,
+              size: 16,
+              color: AppColors.primary200,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: AppTextStyles.font12Regular.copyWith(
+                color: colors.textPrimary,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

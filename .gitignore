@@ -45,3 +45,4 @@ app.*.map.json
 /android/app/release
 
 terminalcontext.txt
+FLUTTER_APP_PLAN.md

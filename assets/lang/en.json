@@ -93,6 +93,12 @@
       "empty": "No file history yet",
       "holdings_count": "{count} holdings",
       "file_missing": "The file no longer exists on this device."
+    },
+    "basin": {
+      "title": "Focus on a basin",
+      "subtitle": "Choose a basin to speed up search, or leave All to search the whole file.",
+      "all": "All",
+      "focus_label": "Basin: {basin}"
     }
   }
 }

@@ -203,8 +203,25 @@ class HoldingsRepository {
     await prefs.setString(_historyKey, encoded);
   }
 
-  List<SearchResult> search(final String query) =>
-      _searchService.search(_parcels, query);
+  /// Searches within [basin] (اسم الحوض) if given, otherwise the whole
+  /// dataset — narrowing the scope keeps fuzzy matching fast on large files.
+  List<SearchResult> search(final String query, {final String? basin}) {
+    final List<Parcel> scope = basin == null
+        ? _parcels
+        : _parcels.where((final Parcel p) => p.basinName == basin).toList();
+    return _searchService.search(scope, query);
+  }
+
+  /// Distinct اسم الحوض values in the active dataset, sorted.
+  List<String> get availableBasins {
+    final Set<String> basins = <String>{};
+    for (final Parcel p in _parcels) {
+      final String? name = p.basinName?.trim();
+      if (name != null && name.isNotEmpty) basins.add(name);
+    }
+    final List<String> sorted = basins.toList()..sort();
+    return sorted;
+  }
 
   List<Parcel> parcelsForHolding(final String holdingId) =>
       _parcels.where((final Parcel p) => p.holdingId == holdingId).toList();

@@ -20,14 +20,7 @@ class HomeCubit extends Cubit<HomeState> {
         emit(state.copyWith(status: HomeStatus.noFile));
         return;
       }
-      emit(
-        state.copyWith(
-          status: HomeStatus.loaded,
-          parcels: parcels,
-          query: '',
-          results: const <SearchResult>[],
-        ),
-      );
+      emit(_loadedState(parcels));
     } on HoldingsParseException catch (e) {
       emit(_parseErrorState(e));
     } catch (_) {
@@ -39,14 +32,7 @@ class HomeCubit extends Cubit<HomeState> {
     emit(state.copyWith(status: HomeStatus.loading));
     try {
       final List<Parcel> parcels = await _repository.loadFromPickedFile();
-      emit(
-        state.copyWith(
-          status: HomeStatus.loaded,
-          parcels: parcels,
-          query: '',
-          results: const <SearchResult>[],
-        ),
-      );
+      emit(_loadedState(parcels));
     } on HoldingsFilePickCancelled {
       // User dismissed the picker — return to whatever state we were in.
       emit(
@@ -79,14 +65,7 @@ class HomeCubit extends Cubit<HomeState> {
       final List<Parcel> parcels = await _repository.loadFromHistoryEntry(
         entry,
       );
-      emit(
-        state.copyWith(
-          status: HomeStatus.loaded,
-          parcels: parcels,
-          query: '',
-          results: const <SearchResult>[],
-        ),
-      );
+      emit(_loadedState(parcels));
     } on HoldingsFilePickCancelled {
       emit(
         state.copyWith(
@@ -103,11 +82,31 @@ class HomeCubit extends Cubit<HomeState> {
     }
   }
 
+  HomeState _loadedState(final List<Parcel> parcels) {
+    return state.copyWith(
+      status: HomeStatus.loaded,
+      parcels: parcels,
+      query: '',
+      results: const <SearchResult>[],
+      availableBasins: _repository.availableBasins,
+      selectedBasin: null,
+    );
+  }
+
   void search(final String query) {
     final List<SearchResult> results = query.trim().isEmpty
         ? const <SearchResult>[]
-        : _repository.search(query);
+        : _repository.search(query, basin: state.selectedBasin);
     emit(state.copyWith(query: query, results: results));
+  }
+
+  /// Narrows subsequent searches to [basin] (اسم الحوض), or `null` to
+  /// search the whole loaded dataset again.
+  void selectBasin(final String? basin) {
+    final List<SearchResult> results = state.query.trim().isEmpty
+        ? const <SearchResult>[]
+        : _repository.search(state.query, basin: basin);
+    emit(state.copyWith(selectedBasin: basin, results: results));
   }
 
   HomeState _parseErrorState(final HoldingsParseException e) {
