@@ -1,0 +1,60 @@
+flutter_native_splash:
+  #======================================================================
+  # 🚀 GLOBAL SPLASH SETTINGS  (Android <12, iOS, Web)
+  #======================================================================
+
+  # Background color (use this OR background_image)
+  color: "#42a5f5"
+  # color_dark: "#042a49"
+
+  # Main splash image (must be a 4x PNG)
+  image: assets/images/splash.png
+  # image_dark: assets/splash_dark.png
+
+  # Image alignment (optional)
+  # android_gravity: center
+  # ios_content_mode: center
+  # web_image_mode: center
+
+  # Optional branding (footer logo)
+  # branding: assets/brand.png
+  # branding_dark: assets/brand_dark.png
+  # branding_mode: bottom
+  # branding_bottom_padding: 24
+
+  # Fullscreen mode (Android only)
+  fullscreen: true
+
+  #======================================================================
+  # 🟦 ANDROID 12+ SETTINGS  — required for proper splash
+  #======================================================================
+
+  android_12:
+    # Splash background color
+    color: "#42a5f5"
+    # color_dark: "#042a49"
+
+    # Center icon (replaces default Android 12 icon)
+    image: assets/images/logo/blank.png
+    # image_dark: assets/images/logo/logo_dark.png
+
+    # Circle background behind the image
+    icon_background_color: "#111111"
+    # icon_background_color_dark: "#eeeeee"
+
+  #======================================================================
+  # ❌ PLATFORM OVERRIDES (optional)
+  #======================================================================
+  # android: false
+  # ios: false
+  # web: false
+
+
+  # To run the command to create the splash screen
+  # dart run flutter_native_splash:create --path=flutter_native_splash.yaml
+
+  # To run the command to update the splash screen
+  # dart run flutter_native_splash:update --path=flutter_native_splash.yaml
+
+  # To run the command to delete the splash screen
+  # dart run flutter_native_splash:delete --path=flutter_native_splash.yaml

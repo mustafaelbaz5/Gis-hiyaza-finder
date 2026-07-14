@@ -1,0 +1,60 @@
+{
+  "app_title": "My App",
+  "welcome": "Welcome",
+  "errors": {
+    "no_internet": "No internet connection. Please check your network.",
+    "timeout": "Request timeout. Please try again.",
+    "connection_error": "Connection error. Please check your internet connection.",
+    "bad_request": "Invalid request. Please check your input.",
+    "unauthorized": "Unauthorized access. Please login again.",
+    "forbidden": "Access forbidden. You don't have permission.",
+    "not_found": "Resource not found.",
+    "conflict": "Conflict error. Data already exists.",
+    "server_error": "Server error occurred. Please try again later.",
+    "invalid_credentials": "Invalid email or password.",
+    "user_not_found": "No account found with this email.",
+    "email_already_exists": "An account with this email already exists.",
+    "weak_password": "Password is too weak. Please use a stronger password.",
+    "invalid_email": "Invalid email address format.",
+    "session_expired": "Your session has expired. Please login again.",
+    "email_not_verified": "Please verify your email address.",
+    "validation": "Validation error. Please check your input.",
+    "cancelled": "Operation was cancelled.",
+    "unknown": "An unexpected error occurred.",
+    "too_many_requests": "Too many attempts. Please try again later.",
+    "permission_denied": "You don't have permission to perform this action.",
+    "service_unavailable": "Service temporarily unavailable. Please try again.",
+    "file_too_large": "File is too large.",
+    "user_disabled": "This account has been disabled.",
+    "operation_not_allowed": "This operation is not allowed."
+  },
+  "about": {
+    "sections": {
+      "app_info": "App Info",
+      "developer": "Developer",
+      "support": "Support",
+      "legal": "Legal"
+    },
+    "app_info": {
+      "platform": "Platform",
+      "platform_ios": "iOS",
+      "platform_android": "Android",
+      "package": "Package",
+      "last_updated": "Last Updated",
+      "development_badge": "Development"
+    },
+    "support": {
+      "rate_app": "Rate the App",
+      "report_bug": "Report a Bug",
+      "contact_us": "Contact Us"
+    },
+    "legal": {
+      "privacy_policy": "Privacy Policy",
+      "terms_of_service": "Terms of Service",
+      "open_source_licenses": "Open Source Licenses"
+    },
+    "footer": {
+      "made_with_love": "Made with ❤ by"
+    }
+  }
+}

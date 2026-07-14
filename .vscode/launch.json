@@ -1,0 +1,54 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "My App Dev",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main_dev.dart",
+      "args": [
+        "--flavor",
+        "development",
+        "--target",
+        "lib/main_dev.dart",
+        "--dart-define",
+        "ENV=development",
+        "--dart-define",
+        "APP_NAME=Flutter Starter Dev"
+      ]
+    },
+    {
+      "name": "My App Dev (Profile)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main_dev.dart",
+      "args": [
+        "--flavor",
+        "development",
+        "--target",
+        "lib/main_dev.dart",
+        "--dart-define",
+        "ENV=development",
+        "--dart-define",
+        "APP_NAME=Flutter Starter Dev",
+        "--profile"
+      ]
+    },
+    {
+      "name": "My App Prod",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main_prod.dart",
+      "args": [
+        "--flavor",
+        "production",
+        "--target",
+        "lib/main_prod.dart",
+        "--dart-define",
+        "ENV=production",
+        "--dart-define",
+        "APP_NAME=Flutter Starter"
+      ]
+    }
+  ]
+}

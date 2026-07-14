@@ -1,0 +1,128 @@
+name: flutter_structure
+description: "A new Flutter project."
+publish_to: "none"
+version: 1.0.0+1
+
+# ----------------------------------------------------------------
+# ENVIRONMENT
+# ----------------------------------------------------------------
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+# ----------------------------------------------------------------
+# DEPENDENCIES
+# ----------------------------------------------------------------
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # --- Firebase ---
+  firebase_core: any
+  firebase_auth: any
+  cloud_firestore: any
+  firebase_storage: any
+
+  # --- Supabase ---
+  supabase_flutter: any
+
+  # --- State Management ---
+  bloc: any
+  flutter_bloc: any
+  hydrated_bloc: any
+
+  # --- Networking ---
+  dio: any
+
+  # --- Storage & Preferences ---
+  flutter_secure_storage: any
+  shared_preferences: any
+  path_provider: any
+
+  # --- Dependency Injection ---
+  get_it: any
+
+  # --- Localization ---
+  easy_localization: any
+
+  # --- UI & Design ---
+  cupertino_icons: any
+  google_fonts: any
+  flutter_screenutil: any
+  flutter_native_splash: any
+
+  # --- Utilities ---
+  rename: any
+  internet_connection_checker: any
+  equatable: any
+  url_launcher: ^6.3.2
+  flutter_svg: ^2.2.4
+
+# ----------------------------------------------------------------
+# DEV DEPENDENCIES
+# ----------------------------------------------------------------
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: any
+  test: any
+  mockito: any
+  build_runner: any
+  flutter_launcher_icons: ^0.14.4
+
+# ----------------------------------------------------------------
+# FLUTTER SETTINGS
+# ----------------------------------------------------------------
+flutter:
+  uses-material-design: true
+
+  # --- Assets ---
+  assets:
+    - assets/images/
+    - assets/svgs/
+    - assets/lang/
+
+  # --- Fonts ---
+  fonts:
+    - family: Manrope
+      fonts:
+        - asset: assets/fonts/manrope/Manrope-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/manrope/Manrope-Light.ttf
+          weight: 300
+        - asset: assets/fonts/manrope/Manrope-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/manrope/Manrope-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/manrope/Manrope-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/manrope/Manrope-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/manrope/Manrope-ExtraBold.ttf
+          weight: 800
+
+    - family: Tajawal
+      fonts:
+        - asset: assets/fonts/tajawal/Tajawal-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/tajawal/Tajawal-Light.ttf
+          weight: 300
+        - asset: assets/fonts/tajawal/Tajawal-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/tajawal/Tajawal-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/tajawal/Tajawal-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/tajawal/Tajawal-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/tajawal/Tajawal-Black.ttf
+          weight: 900
+
+# ----------------------------------------------------------------
+# APP ICON
+# ----------------------------------------------------------------
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/app_Logo.png"
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "assets/images/app_Logo.png"
