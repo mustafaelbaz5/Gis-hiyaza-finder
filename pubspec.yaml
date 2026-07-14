@@ -57,6 +57,11 @@ dependencies:
   url_launcher: ^6.3.2
   flutter_svg: ^2.2.4
 
+  # --- Excel / Search ---
+  file_picker: ^8.1.4
+  excel: any
+  fuzzywuzzy: any
+
 # ----------------------------------------------------------------
 # DEV DEPENDENCIES
 # ----------------------------------------------------------------

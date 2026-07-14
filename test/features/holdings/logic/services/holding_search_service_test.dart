@@ -1,0 +1,76 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:hiyaza_finder/features/holdings/data/models/parcel.dart';
+import 'package:hiyaza_finder/features/holdings/logic/services/holding_search_service.dart';
+
+Parcel _parcel(final String holdingId, final String holderName) => Parcel(
+  holdingId: holdingId,
+  holderName: holderName,
+);
+
+void main() {
+  const HoldingSearchService service = HoldingSearchService();
+
+  final List<Parcel> parcels = [
+    _parcel('001117', 'محمد أحمد علي'),
+    _parcel('001117', 'محمد أحمد علي'), // 2nd parcel, same holding
+    _parcel('002200', 'علي حسن محمود'),
+    _parcel('003300', 'سارة محمد'),
+  ];
+
+  group('numeric queries', () {
+    test('exact prefix scores 100', () {
+      final results = service.search(parcels, '0011');
+      expect(results.first.holdingId, '001117');
+      expect(results.first.score, 100);
+      expect(results.first.parcelCount, 2);
+    });
+
+    test('contains but not prefix scores 50', () {
+      final results = service.search(parcels, '117');
+      expect(results.first.holdingId, '001117');
+      expect(results.first.score, 50);
+    });
+
+    test('no digit match returns empty', () {
+      final results = service.search(parcels, '999999');
+      expect(results, isEmpty);
+    });
+  });
+
+  group('text queries', () {
+    test('fuzzy matches holder name above threshold', () {
+      final results = service.search(parcels, 'محمد احمد');
+      expect(results.map((final r) => r.holdingId), contains('001117'));
+    });
+
+    test('low-similarity name is excluded', () {
+      final results = service.search(parcels, 'زينب فتحي عبدالله');
+      expect(
+        results.any((final r) => r.holdingId == '001117'),
+        isFalse,
+      );
+    });
+
+    test('groups by holding id and keeps best score, sorted descending', () {
+      final results = service.search(parcels, 'محمد');
+      for (var i = 0; i < results.length - 1; i++) {
+        expect(results[i].score, greaterThanOrEqualTo(results[i + 1].score));
+      }
+      final ids = results.map((final r) => r.holdingId).toList();
+      expect(ids.toSet().length, ids.length); // no duplicate holding ids
+    });
+
+    test('caps results at 10', () {
+      final many = List.generate(
+        20,
+        (final i) => _parcel('id$i', 'محمد أحمد رقم $i'),
+      );
+      final results = service.search(many, 'محمد أحمد');
+      expect(results.length, lessThanOrEqualTo(10));
+    });
+  });
+
+  test('empty query returns no results', () {
+    expect(service.search(parcels, '   '), isEmpty);
+  });
+}

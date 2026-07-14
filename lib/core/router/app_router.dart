@@ -1,8 +1,15 @@
 // ignore_for_file: always_specify_types
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hiyaza_finder/core/di/dependency_injection.dart';
 import 'package:hiyaza_finder/core/router/routes.dart';
 import 'package:hiyaza_finder/features/about/ui/about_screen.dart';
+import 'package:hiyaza_finder/features/holdings/data/models/parcel.dart';
+import 'package:hiyaza_finder/features/holdings/data/repository/holdings_repository.dart';
+import 'package:hiyaza_finder/features/holdings/logic/cubit/home_cubit.dart';
+import 'package:hiyaza_finder/features/holdings/ui/screens/detail_screen.dart';
+import 'package:hiyaza_finder/features/holdings/ui/screens/home_screen.dart';
 
 class AppRouter {
   AppRouter._();
@@ -11,10 +18,18 @@ class AppRouter {
     switch (settings.name) {
       case Routes.aboutScreen:
         return _buildRoute(const AboutScreen(), settings);
-      // case Routes.onboarding:
-      //   return _buildRoute(const OnboardingScreen(), settings);
-      // case Routes.home:
-      //   return _buildRoute(const HomeScreen(), settings);
+      case Routes.home:
+        return _buildRoute(
+          BlocProvider<HomeCubit>(
+            create: (final _) => HomeCubit(getIt<HoldingsRepository>())..init(),
+            child: const HomeScreen(),
+          ),
+          settings,
+        );
+      case Routes.holdingDetail:
+        final List<Parcel> parcels =
+            (settings.arguments as List<Parcel>?) ?? const <Parcel>[];
+        return _buildRoute(DetailScreen(parcels: parcels), settings);
       default:
         return _buildRoute(
           Scaffold(

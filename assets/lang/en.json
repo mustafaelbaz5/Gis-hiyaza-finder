@@ -56,5 +56,31 @@
     "footer": {
       "made_with_love": "Made with ❤ by"
     }
+  },
+  "holdings": {
+    "empty": {
+      "title": "No file loaded",
+      "desc": "Choose the Excel file produced by the desktop app.",
+      "pick_file": "Choose file"
+    },
+    "error": {
+      "invalid_file": "Invalid file. Missing columns: {columns}",
+      "generic": "An unexpected error occurred while reading the file.",
+      "pick_another": "Choose another file"
+    },
+    "home": {
+      "holdings_loaded": "{count} holdings loaded",
+      "change_file": "Change file"
+    },
+    "search": {
+      "hint": "Search by holder name or holding number …",
+      "no_results": "No results"
+    },
+    "detail": {
+      "title": "Holding #{id}",
+      "empty": "No data for this holding",
+      "copy_all": "Copy all data",
+      "copied": "Copied"
+    }
   }
 }

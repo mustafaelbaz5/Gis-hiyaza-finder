@@ -16,8 +16,8 @@ class AppSettingsState extends Equatable {
 
   /// Default state
   factory AppSettingsState.initial() => const AppSettingsState(
-        themeMode: ThemeMode.system,
-        locale: Locale('en'),
+        themeMode: ThemeMode.light,
+        locale: Locale('ar'),
       );
 
   /// Font family derived from locale — no manual switching needed

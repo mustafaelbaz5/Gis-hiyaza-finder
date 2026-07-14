@@ -31,7 +31,7 @@ class HiyazaFinderApp extends StatelessWidget {
                 supportedLocales: context.supportedLocales,
                 locale: settings.locale, // driven by cubit
                 debugShowCheckedModeBanner: false,
-                initialRoute: Routes.aboutScreen,
+                initialRoute: Routes.home,
                 onGenerateRoute: AppRouter.generateRoute,
                 title: AppConfig.appName,
                 // font family injected into both themes

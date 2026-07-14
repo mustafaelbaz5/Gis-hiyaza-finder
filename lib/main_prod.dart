@@ -37,7 +37,7 @@ void main() async {
       supportedLocales: LocalizationManager.supportedLocales,
       path: LocalizationManager.translationsPath,
       fallbackLocale: LocalizationManager.fallbackLocale,
-      startLocale: LocalizationManager.fallbackLocale,
+      startLocale: const Locale('ar'),
       child: const HiyazaFinderApp(),
     ),
   );
