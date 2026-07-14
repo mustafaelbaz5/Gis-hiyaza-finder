@@ -1,8 +1,8 @@
 // ignore_for_file: always_specify_types
 
 import 'package:flutter/material.dart';
-import 'package:flutter_structure/core/router/routes.dart';
-import 'package:flutter_structure/features/about/ui/about_screen.dart';
+import 'package:hiyaza_finder/core/router/routes.dart';
+import 'package:hiyaza_finder/features/about/ui/about_screen.dart';
 
 class AppRouter {
   AppRouter._();

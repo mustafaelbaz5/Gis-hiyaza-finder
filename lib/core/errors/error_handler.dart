@@ -1,4 +1,4 @@
-import 'package:flutter_structure/core/errors/failure.dart';
+import 'package:hiyaza_finder/core/errors/failure.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'exceptions.dart' hide NotFoundException;

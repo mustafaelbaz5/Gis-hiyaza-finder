@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.flutter_structure">
+    package="com.hiyaza_finder">
 
     <uses-permission android:name="android.permission.INTERNET" />
 

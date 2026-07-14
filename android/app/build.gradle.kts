@@ -5,12 +5,12 @@ plugins {
 }
 
 android {
-    namespace = "com.example.flutter_structure"
+    namespace = "com.hiyaza_finder"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
     defaultConfig {
-        applicationId = "com.example.flutter_structure"
+        applicationId = "com.hiyaza_finder"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -39,12 +39,12 @@ android {
         create("development") {
             dimension = "default"
             applicationIdSuffix = ".dev"
-            resValue("string", "app_name", "My App Dev") // app name with Dev
+            resValue("string", "app_name", "HiyazaFinder Dev") // app name with Dev
         }
         create("production") {
             dimension = "default"
             // no suffix for production
-            resValue("string", "app_name", "My App") // clean app name
+            resValue("string", "app_name", "HiyazaFinder") // clean app name
         }
     }
 }
