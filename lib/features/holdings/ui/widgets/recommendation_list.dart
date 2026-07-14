@@ -37,14 +37,14 @@ class RecommendationList extends StatelessWidget {
     }
 
     return Column(
-      children: results
-          .map(
-            (final SearchResult result) => RecommendationTile(
-              result: result,
-              onTap: () => onSelect(result),
-            ),
-          )
-          .toList(),
+      children: [
+        for (final (int i, SearchResult result) in results.indexed)
+          RecommendationTile(
+            result: result,
+            onTap: () => onSelect(result),
+            animationDelay: Duration(milliseconds: i * 40),
+          ),
+      ],
     );
   }
 }

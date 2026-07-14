@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_text_styles.dart';
@@ -10,10 +11,12 @@ class RecommendationTile extends StatelessWidget {
     super.key,
     required this.result,
     required this.onTap,
+    this.animationDelay = Duration.zero,
   });
 
   final SearchResult result;
   final VoidCallback onTap;
+  final Duration animationDelay;
 
   @override
   Widget build(final BuildContext context) {
@@ -67,6 +70,9 @@ class RecommendationTile extends StatelessWidget {
           ],
         ),
       ),
-    );
+    )
+        .animate(delay: animationDelay)
+        .fadeIn(duration: 220.ms)
+        .slideY(begin: 0.08, end: 0, curve: Curves.easeOutCubic);
   }
 }

@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/utils/extensions/context_ext.dart';
@@ -18,11 +19,13 @@ class ParcelDetailCard extends StatelessWidget {
     required this.parcel,
     required this.resolveBorder,
     required this.onNavigate,
+    this.animationDelay = Duration.zero,
   });
 
   final Parcel parcel;
   final String? Function(String borderText) resolveBorder;
   final void Function(String holdingId) onNavigate;
+  final Duration animationDelay;
 
   @override
   Widget build(final BuildContext context) {
@@ -56,6 +59,10 @@ class ParcelDetailCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Column(
               children: [
+                FieldRow(
+                  label: 'holdings.detail.holding_id'.tr(),
+                  value: parcel.holdingId,
+                ),
                 FieldRow(label: 'اسم الحائز', value: parcel.holderName),
                 FieldRow(label: 'الرقم القومي', value: parcel.nationalId),
                 FieldRow(label: 'اسم الحوض', value: parcel.basinName),
@@ -64,8 +71,20 @@ class ParcelDetailCard extends StatelessWidget {
                 FieldRow(label: 'الإدارة', value: parcel.administration),
                 FieldRow(label: 'رقم الأرض', value: parcel.landNumber),
                 FieldRow(
-                  label: 'المساحة',
-                  value: _areaSummary(parcel),
+                  label: 'holdings.detail.feddan'.tr(),
+                  value: _formatNumber(parcel.feddan),
+                ),
+                FieldRow(
+                  label: 'holdings.detail.qirat'.tr(),
+                  value: _formatNumber(parcel.qirat),
+                ),
+                FieldRow(
+                  label: 'holdings.detail.sahm'.tr(),
+                  value: _formatNumber(parcel.sahm),
+                ),
+                FieldRow(
+                  label: 'holdings.detail.total_sqm'.tr(),
+                  value: _formatNumber(parcel.totalSqm),
                   showDivider: false,
                 ),
               ],
@@ -74,28 +93,35 @@ class ParcelDetailCard extends StatelessWidget {
           verticalSpacing(16),
           CustomTextButton.outlined(
             text: 'holdings.detail.copy_all'.tr(),
-            prefixIcon: const Icon(Icons.copy_all_rounded, color: AppColors.primary200),
+            prefixIcon: const Icon(
+              Icons.copy_all_rounded,
+              color: AppColors.primary200,
+            ),
             onPressed: () => _copyAll(context),
           ),
         ],
       ),
-    );
+    )
+        .animate(delay: animationDelay)
+        .fadeIn(duration: 300.ms)
+        .slideY(begin: 0.04, end: 0);
+  }
+
+  /// `null`/empty values are formatted with [FieldRow.emptyPlaceholder] so
+  /// the on-screen display and the copy-all text stay consistent.
+  String? _formatNumber(final double? value) {
+    if (value == null) return null;
+    if (value == value.roundToDouble()) return value.toInt().toString();
+    return value.toString();
   }
 
   String _areaSummary(final Parcel p) {
-    final String feddan = _formatNumber(p.feddan);
-    final String qirat = _formatNumber(p.qirat);
-    final String sahm = _formatNumber(p.sahm);
-    final String sqm = p.totalSqm == null
-        ? '—'
-        : _formatNumber(p.totalSqm);
+    final String feddan = _formatNumber(p.feddan) ?? FieldRow.emptyPlaceholder;
+    final String qirat = _formatNumber(p.qirat) ?? FieldRow.emptyPlaceholder;
+    final String sahm = _formatNumber(p.sahm) ?? FieldRow.emptyPlaceholder;
+    final String sqm =
+        _formatNumber(p.totalSqm) ?? FieldRow.emptyPlaceholder;
     return '$feddan فدان، $qirat قيراط، $sahm سهم ≈ $sqm م²';
-  }
-
-  String _formatNumber(final double? value) {
-    if (value == null) return '0';
-    if (value == value.roundToDouble()) return value.toInt().toString();
-    return value.toString();
   }
 
   Future<void> _copyAll(final BuildContext context) async {
@@ -108,7 +134,8 @@ class ParcelDetailCard extends StatelessWidget {
   }
 
   String _formatForClipboard(final Parcel p) {
-    String dash(final String? v) => (v == null || v.trim().isEmpty) ? '—' : v;
+    String dash(final String? v) =>
+        (v == null || v.trim().isEmpty) ? FieldRow.emptyPlaceholder : v;
 
     return '''
 رقم الحيازة: ${p.holdingId}

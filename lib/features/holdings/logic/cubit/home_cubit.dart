@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/excel/holdings_excel_parser.dart';
+import '../../data/models/cached_file_entry.dart';
 import '../../data/models/parcel.dart';
 import '../../data/repository/holdings_repository.dart';
 import '../services/holding_search_service.dart';
@@ -70,6 +71,37 @@ class HomeCubit extends Cubit<HomeState> {
   /// Same as [pickFile] — kept as a distinct, semantically named entry
   /// point for the "change file" action in the UI.
   Future<void> changeFile() => pickFile();
+
+  /// Switches the active dataset to a previously-loaded file from history.
+  Future<void> openHistoryEntry(final CachedFileEntry entry) async {
+    emit(state.copyWith(status: HomeStatus.loading));
+    try {
+      final List<Parcel> parcels = await _repository.loadFromHistoryEntry(
+        entry,
+      );
+      emit(
+        state.copyWith(
+          status: HomeStatus.loaded,
+          parcels: parcels,
+          query: '',
+          results: const <SearchResult>[],
+        ),
+      );
+    } on HoldingsFilePickCancelled {
+      emit(
+        state.copyWith(
+          status: HomeStatus.error,
+          errorMessage: 'الملف لم يعد موجودًا على الجهاز.',
+        ),
+      );
+    } on HoldingsParseException catch (e) {
+      emit(_parseErrorState(e));
+    } catch (e) {
+      emit(
+        state.copyWith(status: HomeStatus.error, errorMessage: e.toString()),
+      );
+    }
+  }
 
   void search(final String query) {
     final List<SearchResult> results = query.trim().isEmpty

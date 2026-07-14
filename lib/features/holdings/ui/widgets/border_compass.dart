@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_text_styles.dart';
@@ -85,26 +86,40 @@ class _CenterCell extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-      decoration: BoxDecoration(
-        color: AppColors.primary200,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.crop_square_rounded, color: AppColors.white, size: 20),
-          const SizedBox(height: 4),
-          Text(
-            '#$holdingId',
-            style: AppTextStyles.font14Bold.copyWith(color: AppColors.white),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+          decoration: BoxDecoration(
+            color: AppColors.primary200,
+            borderRadius: BorderRadius.circular(12),
           ),
-        ],
-      ),
-    );
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.crop_square_rounded,
+                color: AppColors.white,
+                size: 20,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '#$holdingId',
+                style: AppTextStyles.font14Bold.copyWith(
+                  color: AppColors.white,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        )
+        .animate()
+        .fadeIn(duration: 300.ms)
+        .scale(
+          begin: const Offset(0.85, 0.85),
+          end: const Offset(1, 1),
+          curve: Curves.easeOutBack,
+          duration: 350.ms,
+        );
   }
 }
 

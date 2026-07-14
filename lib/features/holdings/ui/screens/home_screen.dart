@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/dependency_injection.dart';
@@ -43,6 +44,10 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void _openHistory(final BuildContext context) {
+    context.pushNamed(Routes.fileHistory);
+  }
+
   @override
   Widget build(final BuildContext context) {
     final colors = context.customColors;
@@ -53,20 +58,32 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: BlocBuilder<HomeCubit, HomeState>(
           builder: (final BuildContext context, final HomeState state) {
-            return switch (state.status) {
-              HomeStatus.loading => const _LoadingBody(),
-              HomeStatus.noFile => _EmptyBody(onPickFile: cubit.pickFile),
-              HomeStatus.error => _ErrorBody(
-                state: state,
-                onPickFile: cubit.pickFile,
+            return AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              child: KeyedSubtree(
+                key: ValueKey<HomeStatus>(state.status),
+                child: switch (state.status) {
+                  HomeStatus.loading => const _LoadingBody(),
+                  HomeStatus.noFile => _EmptyBody(
+                    onPickFile: cubit.pickFile,
+                    onShowHistory: () => _openHistory(context),
+                  ),
+                  HomeStatus.error => _ErrorBody(
+                    state: state,
+                    onPickFile: cubit.pickFile,
+                    onShowHistory: () => _openHistory(context),
+                  ),
+                  HomeStatus.loaded => _LoadedBody(
+                    state: state,
+                    controller: _controller,
+                    cubit: cubit,
+                    onQueryChanged: (final String q) =>
+                        _onQueryChanged(q, cubit),
+                    onShowHistory: () => _openHistory(context),
+                  ),
+                },
               ),
-              HomeStatus.loaded => _LoadedBody(
-                state: state,
-                controller: _controller,
-                cubit: cubit,
-                onQueryChanged: (final String q) => _onQueryChanged(q, cubit),
-              ),
-            };
+            );
           },
         ),
       ),
@@ -81,14 +98,15 @@ class _LoadingBody extends StatelessWidget {
   Widget build(final BuildContext context) {
     return const Center(
       child: CircularProgressIndicator(color: AppColors.primary200),
-    );
+    ).animate().fadeIn(duration: 200.ms);
   }
 }
 
 class _EmptyBody extends StatelessWidget {
-  const _EmptyBody({required this.onPickFile});
+  const _EmptyBody({required this.onPickFile, required this.onShowHistory});
 
   final VoidCallback onPickFile;
+  final VoidCallback onShowHistory;
 
   @override
   Widget build(final BuildContext context) {
@@ -100,10 +118,18 @@ class _EmptyBody extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              Icons.folder_open_rounded,
-              size: rf(88),
-              color: colors.iconSecondary,
-            ),
+                  Icons.folder_open_rounded,
+                  size: rf(88),
+                  color: colors.iconSecondary,
+                )
+                .animate()
+                .fadeIn(duration: 350.ms)
+                .scale(
+                  begin: const Offset(0.8, 0.8),
+                  end: const Offset(1, 1),
+                  curve: Curves.easeOutBack,
+                  duration: 400.ms,
+                ),
             verticalSpacing(24),
             Text(
               'holdings.empty.title'.tr(),
@@ -131,18 +157,34 @@ class _EmptyBody extends StatelessWidget {
               isFullWidth: false,
               size: CustomButtonSize.large,
             ),
+            verticalSpacing(12),
+            TextButton.icon(
+              onPressed: onShowHistory,
+              icon: const Icon(Icons.history_rounded, color: AppColors.primary200),
+              label: Text(
+                'holdings.home.history'.tr(),
+                style: AppTextStyles.font14SemiBold.copyWith(
+                  color: AppColors.primary200,
+                ),
+              ),
+            ),
           ],
-        ),
+        ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.05, end: 0),
       ),
     );
   }
 }
 
 class _ErrorBody extends StatelessWidget {
-  const _ErrorBody({required this.state, required this.onPickFile});
+  const _ErrorBody({
+    required this.state,
+    required this.onPickFile,
+    required this.onShowHistory,
+  });
 
   final HomeState state;
   final VoidCallback onPickFile;
+  final VoidCallback onShowHistory;
 
   @override
   Widget build(final BuildContext context) {
@@ -164,7 +206,7 @@ class _ErrorBody extends StatelessWidget {
               Icons.error_outline_rounded,
               size: rf(72),
               color: AppColors.red200,
-            ),
+            ).animate().shake(duration: 400.ms, hz: 4),
             verticalSpacing(20),
             Text(
               message,
@@ -179,8 +221,19 @@ class _ErrorBody extends StatelessWidget {
               onPressed: onPickFile,
               isFullWidth: false,
             ),
+            verticalSpacing(12),
+            TextButton.icon(
+              onPressed: onShowHistory,
+              icon: const Icon(Icons.history_rounded, color: AppColors.primary200),
+              label: Text(
+                'holdings.home.history'.tr(),
+                style: AppTextStyles.font14SemiBold.copyWith(
+                  color: AppColors.primary200,
+                ),
+              ),
+            ),
           ],
-        ),
+        ).animate().fadeIn(duration: 300.ms),
       ),
     );
   }
@@ -192,12 +245,14 @@ class _LoadedBody extends StatelessWidget {
     required this.controller,
     required this.cubit,
     required this.onQueryChanged,
+    required this.onShowHistory,
   });
 
   final HomeState state;
   final TextEditingController controller;
   final HomeCubit cubit;
   final void Function(String query) onQueryChanged;
+  final VoidCallback onShowHistory;
 
   @override
   Widget build(final BuildContext context) {
@@ -227,6 +282,14 @@ class _LoadedBody extends StatelessWidget {
                       textAlign: TextAlign.right,
                     ),
                   ),
+                  IconButton(
+                    onPressed: onShowHistory,
+                    tooltip: 'holdings.home.history'.tr(),
+                    icon: const Icon(
+                      Icons.history_rounded,
+                      color: AppColors.primary200,
+                    ),
+                  ),
                   TextButton.icon(
                     onPressed: cubit.changeFile,
                     icon: const Icon(
@@ -254,7 +317,10 @@ class _LoadedBody extends StatelessWidget {
                 suffixIcon: controller.text.isEmpty
                     ? null
                     : IconButton(
-                        icon: Icon(Icons.close_rounded, color: colors.iconSecondary),
+                        icon: Icon(
+                          Icons.close_rounded,
+                          color: colors.iconSecondary,
+                        ),
                         onPressed: () {
                           controller.clear();
                           onQueryChanged('');
@@ -271,7 +337,7 @@ class _LoadedBody extends StatelessWidget {
               ),
               verticalSpacing(24),
             ],
-          ),
+          ).animate().fadeIn(duration: 250.ms),
         );
       },
     );

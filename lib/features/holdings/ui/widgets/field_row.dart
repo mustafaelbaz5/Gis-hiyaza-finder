@@ -20,13 +20,15 @@ class FieldRow extends StatelessWidget {
   final String? value;
   final bool showDivider;
 
-  static const String _emptyPlaceholder = '—';
+  /// Placeholder shown (and copied) when the underlying value is empty —
+  /// the copy action stays active either way.
+  static const String emptyPlaceholder = '-1';
 
   @override
   Widget build(final BuildContext context) {
     final colors = context.customColors;
     final String displayValue =
-        (value == null || value!.trim().isEmpty) ? _emptyPlaceholder : value!;
+        (value == null || value!.trim().isEmpty) ? emptyPlaceholder : value!;
 
     return Column(
       children: [
@@ -58,15 +60,11 @@ class FieldRow extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               IconButton(
-                onPressed: displayValue == _emptyPlaceholder
-                    ? null
-                    : () => _copy(context, displayValue),
-                icon: Icon(
+                onPressed: () => _copy(context, displayValue),
+                icon: const Icon(
                   Icons.copy_rounded,
                   size: 22,
-                  color: displayValue == _emptyPlaceholder
-                      ? colors.iconSecondary
-                      : AppColors.primary200,
+                  color: AppColors.primary200,
                 ),
                 tooltip: 'نسخ',
               ),

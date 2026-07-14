@@ -73,13 +73,14 @@ class DetailScreen extends StatelessWidget {
                   ),
                 )
               else
-                for (final Parcel parcel in parcels) ...[
+                for (final (int i, Parcel parcel) in parcels.indexed) ...[
                   ParcelDetailCard(
                     parcel: parcel,
                     resolveBorder: (final String text) =>
                         repository.resolveBorder(text),
                     onNavigate: (final String neighborId) =>
                         _navigateToHolding(context, repository, neighborId),
+                    animationDelay: Duration(milliseconds: i * 80),
                   ),
                   verticalSpacing(16),
                 ],

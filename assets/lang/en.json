@@ -70,7 +70,8 @@
     },
     "home": {
       "holdings_loaded": "{count} holdings loaded",
-      "change_file": "Change file"
+      "change_file": "Change file",
+      "history": "History"
     },
     "search": {
       "hint": "Search by holder name or holding number …",
@@ -80,7 +81,18 @@
       "title": "Holding #{id}",
       "empty": "No data for this holding",
       "copy_all": "Copy all data",
-      "copied": "Copied"
+      "copied": "Copied",
+      "holding_id": "Holding number",
+      "feddan": "Feddan",
+      "qirat": "Qirat",
+      "sahm": "Sahm",
+      "total_sqm": "Total area (m²)"
+    },
+    "history": {
+      "title": "File history",
+      "empty": "No file history yet",
+      "holdings_count": "{count} holdings",
+      "file_missing": "The file no longer exists on this device."
     }
   }
 }

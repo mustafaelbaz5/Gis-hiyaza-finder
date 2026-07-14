@@ -49,6 +49,7 @@ dependencies:
   google_fonts: any
   flutter_screenutil: any
   flutter_native_splash: any
+  flutter_animate: ^4.5.2
 
   # --- Utilities ---
   rename: any

@@ -9,6 +9,7 @@ import 'package:hiyaza_finder/features/holdings/data/models/parcel.dart';
 import 'package:hiyaza_finder/features/holdings/data/repository/holdings_repository.dart';
 import 'package:hiyaza_finder/features/holdings/logic/cubit/home_cubit.dart';
 import 'package:hiyaza_finder/features/holdings/ui/screens/detail_screen.dart';
+import 'package:hiyaza_finder/features/holdings/ui/screens/history_screen.dart';
 import 'package:hiyaza_finder/features/holdings/ui/screens/home_screen.dart';
 
 class AppRouter {
@@ -30,6 +31,8 @@ class AppRouter {
         final List<Parcel> parcels =
             (settings.arguments as List<Parcel>?) ?? const <Parcel>[];
         return _buildRoute(DetailScreen(parcels: parcels), settings);
+      case Routes.fileHistory:
+        return _buildRoute(const HistoryScreen(), settings);
       default:
         return null;
     }
