@@ -19,7 +19,7 @@ class AppConfig {
   // App Info
   static const String appName = String.fromEnvironment(
     'APP_NAME',
-    defaultValue: 'Flutter Starter Dev',
+    defaultValue: 'HiyazaFinder Dev',
   );
   static const String appVersion = '1.0.0';
   static const String buildNumber = '1';

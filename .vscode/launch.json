@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "My App Dev",
+      "name": "HiyazaFinder Dev",
       "type": "dart",
       "request": "launch",
       "program": "lib/main_dev.dart",
@@ -14,11 +14,11 @@
         "--dart-define",
         "ENV=development",
         "--dart-define",
-        "APP_NAME=Flutter Starter Dev"
+        "APP_NAME=HiyazaFinder Dev"
       ]
     },
     {
-      "name": "My App Dev (Profile)",
+      "name": "HiyazaFinder (Profile)",
       "type": "dart",
       "request": "launch",
       "program": "lib/main_dev.dart",
@@ -30,12 +30,12 @@
         "--dart-define",
         "ENV=development",
         "--dart-define",
-        "APP_NAME=Flutter Starter Dev",
+        "APP_NAME=HiyazaFinder Dev",
         "--profile"
       ]
     },
     {
-      "name": "My App Prod",
+      "name": "HiyazaFinder Prod",
       "type": "dart",
       "request": "launch",
       "program": "lib/main_prod.dart",
@@ -47,7 +47,7 @@
         "--dart-define",
         "ENV=production",
         "--dart-define",
-        "APP_NAME=Flutter Starter"
+        "APP_NAME=HiyazaFinder"
       ]
     }
   ]
