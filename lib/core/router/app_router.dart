@@ -14,7 +14,7 @@ import 'package:hiyaza_finder/features/holdings/ui/screens/home_screen.dart';
 class AppRouter {
   AppRouter._();
 
-  static Route<dynamic> generateRoute(final RouteSettings settings) {
+  static Route<dynamic>? generateRoute(final RouteSettings settings) {
     switch (settings.name) {
       case Routes.aboutScreen:
         return _buildRoute(const AboutScreen(), settings);
@@ -31,12 +31,7 @@ class AppRouter {
             (settings.arguments as List<Parcel>?) ?? const <Parcel>[];
         return _buildRoute(DetailScreen(parcels: parcels), settings);
       default:
-        return _buildRoute(
-          Scaffold(
-            body: Center(child: Text('No route defined for ${settings.name}')),
-          ),
-          settings,
-        );
+        return null;
     }
   }
 
@@ -48,27 +43,26 @@ class AppRouter {
       settings: settings,
       pageBuilder: (final context, final animation, final secondaryAnimation) =>
           page,
-      transitionsBuilder:
-          (
-            final context,
-            final animation,
-            final secondaryAnimation,
-            final child,
-          ) {
-            const begin = Offset(1.0, 0.0);
-            const end = Offset.zero;
-            const curve = Curves.easeInOutCubic;
+      transitionsBuilder: (
+        final context,
+        final animation,
+        final secondaryAnimation,
+        final child,
+      ) {
+        const begin = Offset(1.0, 0.0);
+        const end = Offset.zero;
+        const curve = Curves.easeInOutCubic;
 
-            final tween = Tween(
-              begin: begin,
-              end: end,
-            ).chain(CurveTween(curve: curve));
+        final tween = Tween(
+          begin: begin,
+          end: end,
+        ).chain(CurveTween(curve: curve));
 
-            return SlideTransition(
-              position: animation.drive(tween),
-              child: child,
-            );
-          },
+        return SlideTransition(
+          position: animation.drive(tween),
+          child: child,
+        );
+      },
       transitionDuration: const Duration(milliseconds: 300),
     );
   }
