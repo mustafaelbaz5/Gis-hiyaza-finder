@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/dependency_injection.dart';
 import '../../../../core/router/routes.dart';
+import '../../../../core/settings/ui/settings_sheet.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_text_styles.dart';
 import '../../../../core/utils/extensions/context_ext.dart';
@@ -45,14 +46,9 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  void _openHistory(final BuildContext context) {
-    context.pushNamed(Routes.fileHistory);
-  }
+  void _openHistory() => context.pushNamed(Routes.fileHistory);
 
-  Future<void> _openBasinFilter(
-    final BuildContext context,
-    final HomeCubit cubit,
-  ) async {
+  Future<void> _openBasinFilter(final HomeCubit cubit) async {
     final HomeState state = cubit.state;
     final String? selected = await showBasinFilterSheet(
       context,
@@ -78,37 +74,126 @@ class _HomeScreenState extends State<HomeScreen> {
               previous.status != HomeStatus.loaded &&
               current.availableBasins.length > 1,
           listener: (final BuildContext context, final HomeState state) {
-            _openBasinFilter(context, cubit);
+            _openBasinFilter(cubit);
           },
           builder: (final BuildContext context, final HomeState state) {
-            return AnimatedSwitcher(
-              duration: const Duration(milliseconds: 250),
-              child: KeyedSubtree(
-                key: ValueKey<HomeStatus>(state.status),
-                child: switch (state.status) {
-                  HomeStatus.loading => const _LoadingBody(),
-                  HomeStatus.noFile => _EmptyBody(
-                    onPickFile: cubit.pickFile,
-                    onShowHistory: () => _openHistory(context),
+            return Column(
+              children: <Widget>[
+                _HomeTopBar(
+                  onSettings: () => showSettingsSheet(context),
+                  onHistory: _openHistory,
+                ),
+                Expanded(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 250),
+                    child: KeyedSubtree(
+                      key: ValueKey<HomeStatus>(state.status),
+                      child: switch (state.status) {
+                        HomeStatus.loading => const _LoadingBody(),
+                        HomeStatus.noFile => _EmptyBody(
+                          onPickFile: cubit.pickFile,
+                        ),
+                        HomeStatus.error => _ErrorBody(
+                          state: state,
+                          onPickFile: cubit.pickFile,
+                        ),
+                        HomeStatus.loaded => _LoadedBody(
+                          state: state,
+                          controller: _controller,
+                          cubit: cubit,
+                          onQueryChanged: (final String q) =>
+                              _onQueryChanged(q, cubit),
+                          onOpenBasinFilter: () => _openBasinFilter(cubit),
+                        ),
+                      },
+                    ),
                   ),
-                  HomeStatus.error => _ErrorBody(
-                    state: state,
-                    onPickFile: cubit.pickFile,
-                    onShowHistory: () => _openHistory(context),
-                  ),
-                  HomeStatus.loaded => _LoadedBody(
-                    state: state,
-                    controller: _controller,
-                    cubit: cubit,
-                    onQueryChanged: (final String q) =>
-                        _onQueryChanged(q, cubit),
-                    onShowHistory: () => _openHistory(context),
-                    onOpenBasinFilter: () => _openBasinFilter(context, cubit),
-                  ),
-                },
-              ),
+                ),
+              ],
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeTopBar extends StatelessWidget {
+  const _HomeTopBar({required this.onSettings, required this.onHistory});
+
+  final VoidCallback onSettings;
+  final VoidCallback onHistory;
+
+  @override
+  Widget build(final BuildContext context) {
+    final colors = context.customColors;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: rw(12), vertical: rh(8)),
+      child: Row(
+        children: <Widget>[
+          _TopBarIconButton(
+            icon: Icons.settings_rounded,
+            tooltip: 'settings.title'.tr(),
+            onTap: onSettings,
+          ),
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const Icon(
+                  Icons.landscape_rounded,
+                  color: AppColors.primary200,
+                  size: 22,
+                ),
+                horizontalSpacing(6),
+                Text(
+                  'holdings.home.brand'.tr(),
+                  style: AppTextStyles.font20Bold.copyWith(
+                    color: colors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          _TopBarIconButton(
+            icon: Icons.history_rounded,
+            tooltip: 'holdings.home.history'.tr(),
+            onTap: onHistory,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TopBarIconButton extends StatelessWidget {
+  const _TopBarIconButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(final BuildContext context) {
+    final colors = context.customColors;
+
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: colors.surfaceVariant,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: colors.iconPrimary, size: 22),
         ),
       ),
     );
@@ -127,10 +212,9 @@ class _LoadingBody extends StatelessWidget {
 }
 
 class _EmptyBody extends StatelessWidget {
-  const _EmptyBody({required this.onPickFile, required this.onShowHistory});
+  const _EmptyBody({required this.onPickFile});
 
   final VoidCallback onPickFile;
-  final VoidCallback onShowHistory;
 
   @override
   Widget build(final BuildContext context) {
@@ -140,11 +224,18 @@ class _EmptyBody extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: rw(32)),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-                  Icons.folder_open_rounded,
-                  size: rf(88),
-                  color: colors.iconSecondary,
+          children: <Widget>[
+            Container(
+                  padding: EdgeInsets.all(rw(28)),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary50.withValues(alpha: 0.25),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.folder_open_rounded,
+                    size: rf(64),
+                    color: AppColors.primary200,
+                  ),
                 )
                 .animate()
                 .fadeIn(duration: 350.ms)
@@ -181,17 +272,6 @@ class _EmptyBody extends StatelessWidget {
               isFullWidth: false,
               size: CustomButtonSize.large,
             ),
-            verticalSpacing(12),
-            TextButton.icon(
-              onPressed: onShowHistory,
-              icon: const Icon(Icons.history_rounded, color: AppColors.primary200),
-              label: Text(
-                'holdings.home.history'.tr(),
-                style: AppTextStyles.font14SemiBold.copyWith(
-                  color: AppColors.primary200,
-                ),
-              ),
-            ),
           ],
         ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.05, end: 0),
       ),
@@ -200,15 +280,10 @@ class _EmptyBody extends StatelessWidget {
 }
 
 class _ErrorBody extends StatelessWidget {
-  const _ErrorBody({
-    required this.state,
-    required this.onPickFile,
-    required this.onShowHistory,
-  });
+  const _ErrorBody({required this.state, required this.onPickFile});
 
   final HomeState state;
   final VoidCallback onPickFile;
-  final VoidCallback onShowHistory;
 
   @override
   Widget build(final BuildContext context) {
@@ -225,11 +300,18 @@ class _ErrorBody extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: rw(32)),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.error_outline_rounded,
-              size: rf(72),
-              color: AppColors.red200,
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.all(rw(24)),
+              decoration: BoxDecoration(
+                color: AppColors.red200.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.error_outline_rounded,
+                size: rf(56),
+                color: AppColors.red200,
+              ),
             ).animate().shake(duration: 400.ms, hz: 4),
             verticalSpacing(20),
             Text(
@@ -245,17 +327,6 @@ class _ErrorBody extends StatelessWidget {
               onPressed: onPickFile,
               isFullWidth: false,
             ),
-            verticalSpacing(12),
-            TextButton.icon(
-              onPressed: onShowHistory,
-              icon: const Icon(Icons.history_rounded, color: AppColors.primary200),
-              label: Text(
-                'holdings.home.history'.tr(),
-                style: AppTextStyles.font14SemiBold.copyWith(
-                  color: AppColors.primary200,
-                ),
-              ),
-            ),
           ],
         ).animate().fadeIn(duration: 300.ms),
       ),
@@ -269,7 +340,6 @@ class _LoadedBody extends StatelessWidget {
     required this.controller,
     required this.cubit,
     required this.onQueryChanged,
-    required this.onShowHistory,
     required this.onOpenBasinFilter,
   });
 
@@ -277,7 +347,6 @@ class _LoadedBody extends StatelessWidget {
   final TextEditingController controller;
   final HomeCubit cubit;
   final void Function(String query) onQueryChanged;
-  final VoidCallback onShowHistory;
   final VoidCallback onOpenBasinFilter;
 
   @override
@@ -293,58 +362,15 @@ class _LoadedBody extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              verticalSpacing(16),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'holdings.home.holdings_loaded'.tr(
-                        namedArgs: {'count': state.holdingCount.toString()},
-                      ),
-                      style: AppTextStyles.font18Bold.copyWith(
-                        color: colors.textPrimary,
-                      ),
-                      textAlign: TextAlign.right,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: onShowHistory,
-                    tooltip: 'holdings.home.history'.tr(),
-                    icon: const Icon(
-                      Icons.history_rounded,
-                      color: AppColors.primary200,
-                    ),
-                  ),
-                  TextButton.icon(
-                    onPressed: cubit.changeFile,
-                    icon: const Icon(
-                      Icons.swap_horiz_rounded,
-                      color: AppColors.primary200,
-                    ),
-                    label: Text(
-                      'holdings.home.change_file'.tr(),
-                      style: AppTextStyles.font14SemiBold.copyWith(
-                        color: AppColors.primary200,
-                      ),
-                    ),
-                  ),
-                ],
+            children: <Widget>[
+              verticalSpacing(8),
+              _FileInfoCard(
+                holdingCount: state.holdingCount,
+                selectedBasin: state.selectedBasin,
+                hasBasins: state.availableBasins.isNotEmpty,
+                onChangeFile: cubit.changeFile,
+                onOpenBasinFilter: onOpenBasinFilter,
               ),
-              if (state.availableBasins.isNotEmpty) ...[
-                verticalSpacing(10),
-                Align(
-                  alignment: AlignmentDirectional.centerEnd,
-                  child: _BasinChip(
-                    label: state.selectedBasin == null
-                        ? 'holdings.basin.all'.tr()
-                        : 'holdings.basin.focus_label'.tr(
-                            namedArgs: {'basin': state.selectedBasin!},
-                          ),
-                    onTap: onOpenBasinFilter,
-                  ),
-                ),
-              ],
               verticalSpacing(16),
               CustomTextForm(
                 hintText: 'holdings.search.hint'.tr(),
@@ -392,11 +418,114 @@ class _LoadedBody extends StatelessWidget {
   }
 }
 
-class _BasinChip extends StatelessWidget {
-  const _BasinChip({required this.label, required this.onTap});
+class _FileInfoCard extends StatelessWidget {
+  const _FileInfoCard({
+    required this.holdingCount,
+    required this.selectedBasin,
+    required this.hasBasins,
+    required this.onChangeFile,
+    required this.onOpenBasinFilter,
+  });
 
+  final int holdingCount;
+  final String? selectedBasin;
+  final bool hasBasins;
+  final VoidCallback onChangeFile;
+  final VoidCallback onOpenBasinFilter;
+
+  @override
+  Widget build(final BuildContext context) {
+    final colors = context.customColors;
+
+    return Container(
+      padding: EdgeInsets.all(rw(16)),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.primary50.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.dataset_rounded,
+                  color: AppColors.primary200,
+                ),
+              ),
+              horizontalSpacing(12),
+              Expanded(
+                child: Text(
+                  'holdings.home.holdings_loaded'.tr(
+                    namedArgs: {'count': holdingCount.toString()},
+                  ),
+                  style: AppTextStyles.font18Bold.copyWith(
+                    color: colors.textPrimary,
+                  ),
+                  textAlign: TextAlign.right,
+                ),
+              ),
+            ],
+          ),
+          if (hasBasins) ...<Widget>[
+            verticalSpacing(12),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: _InlineAction(
+                    icon: Icons.filter_alt_rounded,
+                    label: selectedBasin == null
+                        ? 'holdings.basin.all'.tr()
+                        : 'holdings.basin.focus_label'.tr(
+                            namedArgs: {'basin': selectedBasin!},
+                          ),
+                    onTap: onOpenBasinFilter,
+                    highlighted: selectedBasin != null,
+                  ),
+                ),
+                horizontalSpacing(10),
+                Expanded(
+                  child: _InlineAction(
+                    icon: Icons.swap_horiz_rounded,
+                    label: 'holdings.home.change_file'.tr(),
+                    onTap: onChangeFile,
+                  ),
+                ),
+              ],
+            ),
+          ] else ...<Widget>[
+            verticalSpacing(12),
+            _InlineAction(
+              icon: Icons.swap_horiz_rounded,
+              label: 'holdings.home.change_file'.tr(),
+              onTap: onChangeFile,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _InlineAction extends StatelessWidget {
+  const _InlineAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.highlighted = false,
+  });
+
+  final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final bool highlighted;
 
   @override
   Widget build(final BuildContext context) {
@@ -404,27 +533,31 @@ class _BasinChip extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: AppColors.primary50.withValues(alpha: 0.3),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.primary200),
+          color: highlighted
+              ? AppColors.primary50.withValues(alpha: 0.3)
+              : colors.surfaceVariant,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: highlighted ? AppColors.primary200 : Colors.transparent,
+          ),
         ),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.filter_alt_rounded,
-              size: 16,
-              color: AppColors.primary200,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: AppTextStyles.font12Regular.copyWith(
-                color: colors.textPrimary,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Icon(icon, size: 18, color: AppColors.primary200),
+            horizontalSpacing(6),
+            Flexible(
+              child: Text(
+                label,
+                style: AppTextStyles.font12Bold.copyWith(
+                  color: colors.textPrimary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

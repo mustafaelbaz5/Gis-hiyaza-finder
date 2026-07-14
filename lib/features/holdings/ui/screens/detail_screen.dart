@@ -6,6 +6,7 @@ import '../../../../core/router/routes.dart';
 import '../../../../core/themes/app_text_styles.dart';
 import '../../../../core/utils/extensions/context_ext.dart';
 import '../../../../core/utils/spacing.dart';
+import '../../../../core/widgets/app_back_button.dart';
 import '../../data/models/parcel.dart';
 import '../../data/repository/holdings_repository.dart';
 import '../widgets/parcel_detail_card.dart';
@@ -35,19 +36,8 @@ class DetailScreen extends StatelessWidget {
               verticalSpacing(16),
               Row(
                 children: [
-                  GestureDetector(
-                    onTap: () => context.pop(),
-                    behavior: HitTestBehavior.opaque,
-                    child: Padding(
-                      padding: const EdgeInsets.all(4),
-                      child: Icon(
-                        Icons.arrow_forward_ios_rounded,
-                        size: rr(20),
-                        color: colors.textPrimary,
-                      ),
-                    ),
-                  ),
-                  horizontalSpacing(8),
+                  const AppBackButton(),
+                  horizontalSpacing(12),
                   Expanded(
                     child: Text(
                       'holdings.detail.title'.tr(namedArgs: {'id': holdingId}),

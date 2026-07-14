@@ -69,6 +69,7 @@
       "pick_another": "Choose another file"
     },
     "home": {
+      "brand": "Hiyaza",
       "holdings_loaded": "{count} holdings loaded",
       "change_file": "Change file",
       "history": "History"
@@ -100,5 +101,17 @@
       "all": "All",
       "focus_label": "Basin: {basin}"
     }
+  },
+  "settings": {
+    "title": "Settings",
+    "appearance": "Appearance",
+    "theme_light": "Light",
+    "theme_dark": "Dark",
+    "theme_system": "System",
+    "language": "Language",
+    "lang_ar": "العربية",
+    "lang_en": "English",
+    "more": "More",
+    "about": "About the app"
   }
 }

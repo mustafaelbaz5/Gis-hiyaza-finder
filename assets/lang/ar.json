@@ -69,6 +69,7 @@
       "pick_another": "اختيار ملف آخر"
     },
     "home": {
+      "brand": "حيازة",
       "holdings_loaded": "{count} حيازة محمّلة",
       "change_file": "تغيير الملف",
       "history": "السجل"
@@ -100,5 +101,17 @@
       "all": "الكل",
       "focus_label": "الحوض: {basin}"
     }
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "appearance": "المظهر",
+    "theme_light": "فاتح",
+    "theme_dark": "داكن",
+    "theme_system": "تلقائي",
+    "language": "اللغة",
+    "lang_ar": "العربية",
+    "lang_en": "English",
+    "more": "المزيد",
+    "about": "عن التطبيق"
   }
 }

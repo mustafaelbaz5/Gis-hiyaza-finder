@@ -8,6 +8,7 @@ import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_text_styles.dart';
 import '../../../../core/utils/extensions/context_ext.dart';
 import '../../../../core/utils/spacing.dart';
+import '../../../../core/widgets/app_back_button.dart';
 import '../../data/models/cached_file_entry.dart';
 import '../../data/repository/holdings_repository.dart';
 
@@ -70,19 +71,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
               padding: EdgeInsets.symmetric(horizontal: rw(16)),
               child: Row(
                 children: [
-                  GestureDetector(
-                    onTap: () => context.pop(),
-                    behavior: HitTestBehavior.opaque,
-                    child: Padding(
-                      padding: const EdgeInsets.all(4),
-                      child: Icon(
-                        Icons.arrow_forward_ios_rounded,
-                        size: rr(20),
-                        color: colors.textPrimary,
-                      ),
-                    ),
-                  ),
-                  horizontalSpacing(8),
+                  const AppBackButton(),
+                  horizontalSpacing(12),
                   Expanded(
                     child: Text(
                       'holdings.history.title'.tr(),
