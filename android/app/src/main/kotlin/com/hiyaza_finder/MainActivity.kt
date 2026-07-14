@@ -1,4 +1,4 @@
-package com.example.hiyaza_finder
+package com.hiyaza_finder
 
 import io.flutter.embedding.android.FlutterActivity
 
