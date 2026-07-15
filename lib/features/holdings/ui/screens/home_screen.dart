@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/config/app_config.dart';
 import '../../../../core/di/dependency_injection.dart';
 import '../../../../core/router/routes.dart';
 import '../../../../core/settings/ui/settings_sheet.dart';
@@ -138,19 +139,30 @@ class _HomeTopBar extends StatelessWidget {
             onTap: onSettings,
           ),
           Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                const Icon(
-                  Icons.landscape_rounded,
-                  color: AppColors.primary200,
-                  size: 22,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    const Icon(
+                      Icons.landscape_rounded,
+                      color: AppColors.primary200,
+                      size: 22,
+                    ),
+                    horizontalSpacing(6),
+                    Text(
+                      'holdings.home.brand'.tr(),
+                      style: AppTextStyles.font20Bold.copyWith(
+                        color: colors.textPrimary,
+                      ),
+                    ),
+                  ],
                 ),
-                horizontalSpacing(6),
                 Text(
-                  'holdings.home.brand'.tr(),
-                  style: AppTextStyles.font20Bold.copyWith(
-                    color: colors.textPrimary,
+                  'v${AppConfig.appVersion}',
+                  style: AppTextStyles.font12Regular.copyWith(
+                    color: colors.textHint,
                   ),
                 ),
               ],
