@@ -1,7 +1,7 @@
 name: hiyaza_finder
 description: "A new Flutter project."
 publish_to: "none"
-version: 1.0.0+1
+version: 1.0.2+3
 
 # ----------------------------------------------------------------
 # ENVIRONMENT
@@ -60,7 +60,7 @@ dependencies:
 
   # --- Excel / Search ---
   file_picker: ^8.1.4
-  excel: any
+  spreadsheet_decoder: ^2.3.0
   fuzzywuzzy: any
 
 # ----------------------------------------------------------------
@@ -74,6 +74,8 @@ dev_dependencies:
   mockito: any
   build_runner: any
   flutter_launcher_icons: ^0.14.4
+  # Used only by tests to synthesize sample .xlsx fixtures.
+  excel: any
 
 # ----------------------------------------------------------------
 # FLUTTER SETTINGS

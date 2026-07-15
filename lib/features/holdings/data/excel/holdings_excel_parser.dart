@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:excel/excel.dart';
+import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 
 import '../models/parcel.dart';
 
@@ -20,6 +20,12 @@ class HoldingsParseException implements Exception {
 /// Mirrors `output_file_reader.py`: columns are located by header text (not
 /// fixed index), data starts on row 2, blank/totals rows are skipped, and
 /// holding/national IDs are read as text to preserve leading zeros.
+///
+/// Uses `spreadsheet_decoder` rather than the `excel` package because the
+/// latter throws "Null check operator used on a null value" on some valid
+/// workbooks (fragile style/number-format parsing). `spreadsheet_decoder`
+/// returns plain cell values (`String`/`num`/`bool`/`null`) and is far more
+/// tolerant of how the source file was written.
 class HoldingsExcelParser {
   const HoldingsExcelParser();
 
@@ -47,21 +53,21 @@ class HoldingsExcelParser {
   ];
 
   List<Parcel> parse(final Uint8List bytes) {
-    final excel = Excel.decodeBytes(bytes);
-    final table = excel.tables[sheetName];
+    final SpreadsheetDecoder decoder = SpreadsheetDecoder.decodeBytes(bytes);
+    final SpreadsheetTable? table = decoder.tables[sheetName];
     if (table == null) {
       throw HoldingsParseException([sheetName]);
     }
 
-    final rows = table.rows;
+    final List<List<dynamic>> rows = table.rows;
     if (rows.isEmpty) {
       throw HoldingsParseException(_headers);
     }
 
-    final headerRow = rows.first;
+    final List<dynamic> headerRow = rows.first;
     final columnIndex = <String, int>{};
     for (var i = 0; i < headerRow.length; i++) {
-      final text = _cellText(headerRow[i])?.trim();
+      final String? text = _cellText(headerRow[i]);
       if (text != null && text.isNotEmpty) {
         columnIndex[text] = i;
       }
@@ -73,24 +79,24 @@ class HoldingsExcelParser {
       throw HoldingsParseException(missing);
     }
 
-    String? textAt(final List<Data?> row, final String header) {
-      final idx = columnIndex[header]!;
+    String? textAt(final List<dynamic> row, final String header) {
+      final int idx = columnIndex[header]!;
       if (idx >= row.length) return null;
       return _cellText(row[idx]);
     }
 
-    double? numAt(final List<Data?> row, final String header) {
-      final idx = columnIndex[header]!;
+    double? numAt(final List<dynamic> row, final String header) {
+      final int idx = columnIndex[header]!;
       if (idx >= row.length) return null;
       return _cellNumber(row[idx]);
     }
 
     final parcels = <Parcel>[];
     for (var r = 1; r < rows.length; r++) {
-      final row = rows[r];
+      final List<dynamic> row = rows[r];
       if (_isBlankRow(row)) continue;
 
-      final holdingId = textAt(row, 'رقم الحيازة')?.trim();
+      final String? holdingId = textAt(row, 'رقم الحيازة');
       if (holdingId == null || holdingId.isEmpty) continue;
       if (holdingId == _totalsMarker) continue;
 
@@ -120,33 +126,25 @@ class HoldingsExcelParser {
     return parcels;
   }
 
-  bool _isBlankRow(final List<Data?> row) {
-    return row.every((final cell) {
-      final text = _cellText(cell);
-      return text == null || text.trim().isEmpty;
-    });
+  bool _isBlankRow(final List<dynamic> row) {
+    return row.every((final dynamic cell) => _cellText(cell) == null);
   }
 
-  String? _cellText(final Data? cell) {
-    final value = cell?.value;
+  /// Reads a cell as a trimmed non-empty string, or `null` when empty.
+  /// Integral doubles (e.g. `1117.0`) are rendered without the fractional
+  /// part so numeric-looking text keeps a clean value.
+  String? _cellText(final dynamic value) {
     if (value == null) return null;
-    return switch (value) {
-      final TextCellValue v => v.value.toString(),
-      final IntCellValue v => v.value.toString(),
-      final DoubleCellValue v => v.value.toString(),
-      final BoolCellValue v => v.value.toString(),
-      _ => value.toString(),
-    };
+    if (value is double && value == value.roundToDouble()) {
+      return value.toInt().toString();
+    }
+    final String text = value.toString().trim();
+    return text.isEmpty ? null : text;
   }
 
-  double? _cellNumber(final Data? cell) {
-    final value = cell?.value;
+  double? _cellNumber(final dynamic value) {
     if (value == null) return null;
-    return switch (value) {
-      final IntCellValue v => v.value.toDouble(),
-      final DoubleCellValue v => v.value,
-      final TextCellValue v => double.tryParse(v.value.toString().trim()),
-      _ => null,
-    };
+    if (value is num) return value.toDouble();
+    return double.tryParse(value.toString().trim());
   }
 }
