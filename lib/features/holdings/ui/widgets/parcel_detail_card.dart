@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../core/themes/app_colors.dart';
+import '../../../../core/themes/app_text_styles.dart';
 import '../../../../core/utils/extensions/context_ext.dart';
 import '../../../../core/utils/spacing.dart';
 import '../../../../core/widgets/custom_text_button.dart';
@@ -19,12 +20,16 @@ class ParcelDetailCard extends StatelessWidget {
     required this.parcel,
     required this.resolveBorder,
     required this.onNavigate,
+    this.onEdit,
+    this.isEdited = false,
     this.animationDelay = Duration.zero,
   });
 
   final Parcel parcel;
   final String? Function(String borderText) resolveBorder;
   final void Function(String holdingId) onNavigate;
+  final VoidCallback? onEdit;
+  final bool isEdited;
   final Duration animationDelay;
 
   @override
@@ -41,6 +46,74 @@ class ParcelDetailCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (onEdit != null) ...<Widget>[
+            Row(
+              children: <Widget>[
+                if (isEdited)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.amber200.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        const Icon(
+                          Icons.edit_note_rounded,
+                          size: 16,
+                          color: AppColors.amber300,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'holdings.edit.edited_badge'.tr(),
+                          style: AppTextStyles.font12Bold.copyWith(
+                            color: AppColors.amber300,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                const Spacer(),
+                InkWell(
+                  onTap: onEdit,
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary50.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppColors.primary200),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        const Icon(
+                          Icons.edit_rounded,
+                          size: 16,
+                          color: AppColors.primary200,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'holdings.edit.edit_button'.tr(),
+                          style: AppTextStyles.font12Bold.copyWith(
+                            color: AppColors.primary200,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            verticalSpacing(12),
+          ],
           BorderCompass(
             holdingId: parcel.holdingId,
             north: parcel.borderNorth,

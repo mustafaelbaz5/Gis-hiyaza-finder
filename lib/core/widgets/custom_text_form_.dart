@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../themes/app_colors.dart';
 import '../themes/app_text_styles.dart';
@@ -37,6 +38,7 @@ class CustomTextForm extends StatefulWidget {
     this.borderRadius,
     this.contentPadding,
     this.isRTL = false,
+    this.inputFormatters,
   });
 
   final String hintText;
@@ -57,6 +59,7 @@ class CustomTextForm extends StatefulWidget {
   final bool enabled;
   final bool readOnly;
   final bool isRTL;
+  final List<TextInputFormatter>? inputFormatters;
 
   final TextStyle? inputTextStyle;
   final TextStyle? hintStyle;
@@ -116,6 +119,7 @@ class _CustomTextFormState extends State<CustomTextForm> {
       obscureText: _obscureText,
       maxLines: widget.isPassword ? 1 : widget.maxLines,
       maxLength: widget.maxLength,
+      inputFormatters: widget.inputFormatters,
       autofocus: widget.autofocus,
       enabled: widget.enabled,
       readOnly: widget.readOnly,

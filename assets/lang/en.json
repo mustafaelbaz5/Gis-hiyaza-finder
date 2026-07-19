@@ -89,6 +89,17 @@
       "sahm": "Sahm",
       "total_sqm": "Total area (m²)"
     },
+    "edit": {
+      "title": "Edit holding {id}",
+      "edit_button": "Edit",
+      "edited_badge": "Edited",
+      "section_holder": "Holder data",
+      "section_location": "Location",
+      "section_area": "Area",
+      "total_preview": "Total ≈ {value} m²",
+      "save": "Save changes",
+      "saved": "Changes saved"
+    },
     "history": {
       "title": "File history",
       "empty": "No file history yet",

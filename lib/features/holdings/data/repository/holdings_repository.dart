@@ -11,6 +11,7 @@ import '../../logic/services/holding_search_service.dart';
 import '../excel/holdings_excel_parser.dart';
 import '../models/cached_file_entry.dart';
 import '../models/parcel.dart';
+import 'parcel_edits_store.dart';
 
 /// Runs the (potentially heavy) Excel parse in a background isolate via
 /// [compute] so the UI thread never freezes while reading a large workbook.
@@ -30,8 +31,10 @@ class HoldingsRepository {
     final HoldingSearchService searchService = const HoldingSearchService(),
     final BorderNavigatorService borderNavigatorService =
         const BorderNavigatorService(),
+    final ParcelEditsStore editsStore = const ParcelEditsStore(),
   }) : _searchService = searchService,
-       _borderNavigatorService = borderNavigatorService;
+       _borderNavigatorService = borderNavigatorService,
+       _editsStore = editsStore;
 
   static const String _activeFilePathKey = 'holdings_active_file_path';
   static const String _historyKey = 'holdings_file_history';
@@ -40,8 +43,19 @@ class HoldingsRepository {
 
   final HoldingSearchService _searchService;
   final BorderNavigatorService _borderNavigatorService;
+  final ParcelEditsStore _editsStore;
 
   List<Parcel> _parcels = <Parcel>[];
+
+  /// Path of the file whose edits are currently loaded — the key under
+  /// which corrections are persisted.
+  String? _activeFilePath;
+
+  /// Original (unedited) parcels by id, so edits can be reset.
+  Map<String, Parcel> _originalById = <String, Parcel>{};
+
+  /// Per-parcel edit snapshots for the active file.
+  Map<String, Map<String, dynamic>> _edits = <String, Map<String, dynamic>>{};
 
   List<Parcel> get parcels => _parcels;
 
@@ -75,8 +89,7 @@ class HoldingsRepository {
     );
     await _setActivePath(cachedPath);
 
-    _parcels = parsed;
-    return parsed;
+    return _finalizeLoad(parsed, cachedPath);
   }
 
   /// Loads the previously active file, if any. Returns `null` when nothing
@@ -106,9 +119,93 @@ class HoldingsRepository {
 
     final Uint8List bytes = await file.readAsBytes();
     final List<Parcel> parsed = await compute(_parseHoldingsBytes, bytes);
-    _parcels = parsed;
-    return parsed;
+    return _finalizeLoad(parsed, path);
   }
+
+  /// Assigns stable ids, remembers the originals, and overlays any saved
+  /// edits for [filePath] before exposing the dataset.
+  Future<List<Parcel>> _finalizeLoad(
+    final List<Parcel> parsed,
+    final String filePath,
+  ) async {
+    _activeFilePath = filePath;
+    final List<Parcel> withIds = <Parcel>[
+      for (var i = 0; i < parsed.length; i++)
+        parsed[i].copyWith(id: i.toString()),
+    ];
+    _originalById = <String, Parcel>{
+      for (final Parcel p in withIds) p.id: p,
+    };
+    _edits = await _editsStore.load(filePath);
+    _parcels = withIds.map(_applyEdit).toList();
+    return _parcels;
+  }
+
+  Parcel _applyEdit(final Parcel p) {
+    final Map<String, dynamic>? e = _edits[p.id];
+    if (e == null) return p;
+    double? d(final String key) => (e[key] as num?)?.toDouble();
+    return Parcel(
+      id: p.id,
+      holdingId: p.holdingId,
+      pageNumber: p.pageNumber,
+      borderEast: p.borderEast,
+      borderSouth: p.borderSouth,
+      borderWest: p.borderWest,
+      borderNorth: p.borderNorth,
+      directorate: e['directorate'] as String?,
+      administration: e['administration'] as String?,
+      basinName: e['basinName'] as String?,
+      basinCode: e['basinCode'] as String?,
+      holderName: e['holderName'] as String?,
+      nationalId: e['nationalId'] as String?,
+      landNumber: e['landNumber'] as String?,
+      feddan: d('feddan'),
+      qirat: d('qirat'),
+      sahm: d('sahm'),
+      totalSqm: d('totalSqm'),
+    );
+  }
+
+  Map<String, dynamic> _snapshot(final Parcel p) => <String, dynamic>{
+    'directorate': p.directorate,
+    'administration': p.administration,
+    'basinName': p.basinName,
+    'basinCode': p.basinCode,
+    'holderName': p.holderName,
+    'nationalId': p.nationalId,
+    'landNumber': p.landNumber,
+    'feddan': p.feddan,
+    'qirat': p.qirat,
+    'sahm': p.sahm,
+    'totalSqm': p.totalSqm,
+  };
+
+  /// Persists an edited parcel and reflects it in the in-memory dataset so
+  /// search, detail, and border navigation immediately use the new values.
+  Future<void> updateParcel(final Parcel edited) async {
+    final int idx = _parcels.indexWhere((final Parcel p) => p.id == edited.id);
+    if (idx < 0) return;
+    _parcels[idx] = edited;
+    _edits[edited.id] = _snapshot(edited);
+    if (_activeFilePath != null) {
+      await _editsStore.save(_activeFilePath!, _edits);
+    }
+  }
+
+  /// Reverts a parcel to its original parsed values.
+  Future<void> resetParcel(final String id) async {
+    final Parcel? original = _originalById[id];
+    if (original == null) return;
+    final int idx = _parcels.indexWhere((final Parcel p) => p.id == id);
+    if (idx >= 0) _parcels[idx] = original;
+    _edits.remove(id);
+    if (_activeFilePath != null) {
+      await _editsStore.save(_activeFilePath!, _edits);
+    }
+  }
+
+  bool isParcelEdited(final String id) => _edits.containsKey(id);
 
   Future<String> _cacheBytes(
     final Uint8List bytes,

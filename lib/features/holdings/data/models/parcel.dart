@@ -4,6 +4,7 @@
 class Parcel {
   const Parcel({
     required this.holdingId,
+    this.id = '',
     this.pageNumber,
     this.directorate,
     this.administration,
@@ -22,6 +23,10 @@ class Parcel {
     this.totalSqm,
   });
 
+  /// Stable identity within a loaded dataset (the parse-order index).
+  /// Used to key persistent edits so corrections re-apply on reload.
+  final String id;
+
   final String holdingId; // رقم الحيازة
   final String? pageNumber; // رقم الصفحة بالسجل
   final String? directorate; // المديريه
@@ -39,4 +44,30 @@ class Parcel {
   final double? qirat; // قيراط
   final double? sahm; // سهم
   final double? totalSqm; // إجمالي المساحة (م²)
+
+  /// Only [id] can be overridden here — all other fields are copied. Edited
+  /// parcels are built with the full constructor so nullable fields can be
+  /// explicitly cleared, which `copyWith` can't express.
+  Parcel copyWith({final String? id}) {
+    return Parcel(
+      id: id ?? this.id,
+      holdingId: holdingId,
+      pageNumber: pageNumber,
+      directorate: directorate,
+      administration: administration,
+      basinName: basinName,
+      basinCode: basinCode,
+      holderName: holderName,
+      nationalId: nationalId,
+      borderEast: borderEast,
+      borderSouth: borderSouth,
+      borderWest: borderWest,
+      borderNorth: borderNorth,
+      landNumber: landNumber,
+      feddan: feddan,
+      qirat: qirat,
+      sahm: sahm,
+      totalSqm: totalSqm,
+    );
+  }
 }

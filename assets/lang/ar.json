@@ -89,6 +89,17 @@
       "sahm": "سهم",
       "total_sqm": "إجمالي المساحة (م²)"
     },
+    "edit": {
+      "title": "تعديل حيازة {id}",
+      "edit_button": "تعديل",
+      "edited_badge": "معدّلة",
+      "section_holder": "بيانات الحائز",
+      "section_location": "الموقع",
+      "section_area": "المساحة",
+      "total_preview": "الإجمالي ≈ {value} م²",
+      "save": "حفظ التعديلات",
+      "saved": "تم حفظ التعديلات"
+    },
     "history": {
       "title": "سجل الملفات",
       "empty": "لا يوجد سجل ملفات بعد",
