@@ -324,9 +324,14 @@ class HoldingsRepository {
       _parcels.where((final Parcel p) => p.holdingId == holdingId).toList();
 
   /// Resolves a border's free-text name to a navigable holding ID, or
-  /// `null` if no confident match exists.
-  String? resolveBorder(final String borderText) =>
-      _borderNavigatorService.resolve(borderText, _parcels);
+  /// `null` if no confident match exists. [basinName] scopes the match to
+  /// parcels in the same basin as the parcel whose border is being resolved.
+  String? resolveBorder(final String borderText, {final String? basinName}) =>
+      _borderNavigatorService.resolve(
+        borderText,
+        _parcels,
+        basinName: basinName,
+      );
 }
 
 class HoldingsFilePickCancelled implements Exception {

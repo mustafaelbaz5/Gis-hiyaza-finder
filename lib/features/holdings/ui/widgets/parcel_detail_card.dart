@@ -46,6 +46,15 @@ class ParcelDetailCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          CustomTextButton.outlined(
+            text: 'holdings.detail.copy_all'.tr(),
+            prefixIcon: const Icon(
+              Icons.copy_all_rounded,
+              color: AppColors.primary200,
+            ),
+            onPressed: () => _copyAll(context),
+          ),
+          verticalSpacing(16),
           if (onEdit != null) ...<Widget>[
             Row(
               children: <Widget>[
@@ -162,15 +171,6 @@ class ParcelDetailCard extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-          verticalSpacing(16),
-          CustomTextButton.outlined(
-            text: 'holdings.detail.copy_all'.tr(),
-            prefixIcon: const Icon(
-              Icons.copy_all_rounded,
-              color: AppColors.primary200,
-            ),
-            onPressed: () => _copyAll(context),
           ),
         ],
       ),

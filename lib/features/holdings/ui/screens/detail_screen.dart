@@ -107,8 +107,8 @@ class _DetailScreenState extends State<DetailScreen> {
                   ParcelDetailCard(
                     parcel: parcel,
                     isEdited: _repository.isParcelEdited(parcel.id),
-                    resolveBorder: (final String text) =>
-                        _repository.resolveBorder(text),
+                    resolveBorder: (final String text) => _repository
+                        .resolveBorder(text, basinName: parcel.basinName),
                     onNavigate: _navigateToHolding,
                     onEdit: () => _editParcel(parcel),
                     animationDelay: Duration(milliseconds: i * 80),
