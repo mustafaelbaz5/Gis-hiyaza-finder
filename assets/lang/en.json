@@ -76,7 +76,9 @@
     },
     "search": {
       "hint": "Search by holder name or holding number …",
-      "no_results": "No results"
+      "no_results": "No results",
+      "voice": "Voice search",
+      "mic_permission_denied": "Microphone access is required for voice search"
     },
     "detail": {
       "title": "Holding #{id}",

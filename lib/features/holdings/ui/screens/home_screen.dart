@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/config/app_config.dart';
 import '../../../../core/di/dependency_injection.dart';
 import '../../../../core/router/routes.dart';
+import '../../../../core/service/voice_search_service.dart';
 import '../../../../core/settings/ui/settings_sheet.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_text_styles.dart';
@@ -33,10 +35,19 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _controller = TextEditingController();
   Timer? _debounce;
 
+  // Voice search is Android-only: speech_to_text's desktop support is too
+  // unreliable to expose on Windows.
+  final VoiceSearchService? _voiceService =
+      defaultTargetPlatform == TargetPlatform.android
+      ? getIt<VoiceSearchService>()
+      : null;
+  bool _isListening = false;
+
   @override
   void dispose() {
     _debounce?.cancel();
     _controller.dispose();
+    if (_isListening) _voiceService?.stopListening();
     super.dispose();
   }
 
@@ -45,6 +56,40 @@ class _HomeScreenState extends State<HomeScreen> {
     _debounce = Timer(const Duration(milliseconds: 150), () {
       cubit.search(query);
     });
+  }
+
+  Future<void> _toggleVoiceSearch(final HomeCubit cubit) async {
+    final VoiceSearchService? voice = _voiceService;
+    if (voice == null) return;
+
+    if (_isListening) {
+      await voice.stopListening();
+      if (mounted) setState(() => _isListening = false);
+      return;
+    }
+
+    final String localeId = context.locale.languageCode == 'ar'
+        ? 'ar-EG'
+        : 'en-US';
+    final bool started = await voice.startListening(
+      localeId: localeId,
+      onResult: (final String text) {
+        _controller
+          ..text = text
+          ..selection = TextSelection.collapsed(offset: text.length);
+        _onQueryChanged(text, cubit);
+      },
+      onDone: () {
+        if (mounted) setState(() => _isListening = false);
+      },
+    );
+
+    if (!mounted) return;
+    if (!started) {
+      context.showErrorSnackBar('holdings.search.mic_permission_denied'.tr());
+      return;
+    }
+    setState(() => _isListening = true);
   }
 
   void _openHistory() => context.pushNamed(Routes.fileHistory);
@@ -105,6 +150,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           onQueryChanged: (final String q) =>
                               _onQueryChanged(q, cubit),
                           onOpenBasinFilter: () => _openBasinFilter(cubit),
+                          onToggleVoice: _voiceService == null
+                              ? null
+                              : () => _toggleVoiceSearch(cubit),
+                          isListening: _isListening,
                         ),
                       },
                     ),
@@ -353,6 +402,8 @@ class _LoadedBody extends StatelessWidget {
     required this.cubit,
     required this.onQueryChanged,
     required this.onOpenBasinFilter,
+    required this.onToggleVoice,
+    required this.isListening,
   });
 
   final HomeState state;
@@ -360,10 +411,35 @@ class _LoadedBody extends StatelessWidget {
   final HomeCubit cubit;
   final void Function(String query) onQueryChanged;
   final VoidCallback onOpenBasinFilter;
+  final VoidCallback? onToggleVoice;
+  final bool isListening;
 
   @override
   Widget build(final BuildContext context) {
     final colors = context.customColors;
+
+    final List<Widget> suffixButtons = <Widget>[
+      if (onToggleVoice != null)
+        IconButton(
+          icon: Icon(
+            isListening ? Icons.mic_rounded : Icons.mic_none_rounded,
+            color: isListening ? AppColors.primary200 : colors.iconSecondary,
+          ),
+          tooltip: 'holdings.search.voice'.tr(),
+          onPressed: onToggleVoice,
+        ),
+      if (controller.text.isNotEmpty)
+        IconButton(
+          icon: Icon(Icons.close_rounded, color: colors.iconSecondary),
+          onPressed: () {
+            controller.clear();
+            onQueryChanged('');
+          },
+        ),
+    ];
+    final Widget? suffixIcon = suffixButtons.isEmpty
+        ? null
+        : Row(mainAxisSize: MainAxisSize.min, children: suffixButtons);
 
     return LayoutBuilder(
       builder: (final BuildContext context, final BoxConstraints constraints) {
@@ -392,18 +468,7 @@ class _LoadedBody extends StatelessWidget {
                   Icons.search_rounded,
                   color: colors.iconSecondary,
                 ),
-                suffixIcon: controller.text.isEmpty
-                    ? null
-                    : IconButton(
-                        icon: Icon(
-                          Icons.close_rounded,
-                          color: colors.iconSecondary,
-                        ),
-                        onPressed: () {
-                          controller.clear();
-                          onQueryChanged('');
-                        },
-                      ),
+                suffixIcon: suffixIcon,
                 onChanged: onQueryChanged,
               ),
               verticalSpacing(16),

@@ -63,6 +63,10 @@ dependencies:
   spreadsheet_decoder: ^2.3.0
   fuzzywuzzy: any
 
+  # --- Voice Search (Android only) ---
+  speech_to_text: any
+  permission_handler: any
+
 # ----------------------------------------------------------------
 # DEV DEPENDENCIES
 # ----------------------------------------------------------------

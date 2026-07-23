@@ -9,6 +9,7 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import '../../features/holdings/data/repository/holdings_repository.dart';
 import '../config/app_config.dart';
 import '../service/secure_storage.dart';
+import '../service/voice_search_service.dart';
 
 final getIt = GetIt.instance;
 
@@ -40,6 +41,9 @@ Future<void> setUpDependencies() async {
   // --- Repositories ---
   // getIt.registerLazySingleton(() => AuthRepository(getIt()));
   getIt.registerLazySingleton<HoldingsRepository>(() => HoldingsRepository());
+
+  // --- Services ---
+  getIt.registerLazySingleton<VoiceSearchService>(() => VoiceSearchService());
 
   // --- Use Cases ---
   // getIt.registerFactory(() => LoginUseCase(getIt()));

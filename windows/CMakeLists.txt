@@ -32,6 +32,13 @@ set(CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_RELEASE}")
 # Use Unicode for all projects.
 add_definitions(-DUNICODE -D_UNICODE)
 
+# permission_handler_windows (pulled in transitively for the Android-only
+# voice search feature) still uses the deprecated <experimental/coroutine>
+# headers, which newer MSVC/STL versions turn into a hard error. Silence it
+# at the project level so the plugin subdirectory (added below via
+# generated_plugins.cmake) still builds.
+add_definitions(-D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
+
 # Compilation settings that should be applied to most targets.
 #
 # Be cautious about adding new options here, as plugins use this function by
